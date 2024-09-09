@@ -11,7 +11,7 @@ class Token
 {
 
 
-   public static function CreateToken($userEmail)
+   public static function CreateToken($userEmail, $userID)
    {
 
       $key = env('JWT_SECRET');
@@ -19,20 +19,36 @@ class Token
          'iss' => 'laravel-token',
          'iat' => time(),
          'exp' => time() + 60 * 60,
-         'userEmail' => $userEmail
+         'userEmail' => $userEmail,
+         'userID' => $userID
       ];
       //Token Generate
       $jwt = JWT::encode($payload, $key, 'HS256');
       return $jwt;
    }
 
-   function VerifyToken($token)
+   public static function VerifyToken($token): string|object
    {
+      // try {
+      //    $key = env('JWT_SECRET');
+      //    $decoded = JWT::decode($token, new Key($key, 'HS256'));
+      //    return $decoded->userEmail;
+      // } catch (Exception $e) {
+      //    return 'unauthorized';
+      // }
+
       try {
-         $key = env('JWT_SECRET');
-         $decoded = JWT::decode($token, new Key($key, 'HS256'));
-         return $decoded->userEmail;
-      } catch (Exception $e) {
+         if ($token == null) {
+            return 'unauthorized';
+         } else {
+            $key = env('JWT_SECRET');
+            $decoded = JWT::decode(
+               $token,
+               new Key($key, 'HS256')
+            );
+            return $decoded;
+         }
+      } catch (Exception $ex) {
          return 'unauthorized';
       }
    }

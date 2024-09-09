@@ -27,6 +27,33 @@ Route::post('user-registration', [UserController::class, 'UserRegistration'])->n
 Route::get('user-login', [UserController::class, 'UserLogin'])->name('user-login');
 Route::post('login', [UserController::class, 'Login'])->name('login');
 
-Route::get('/dashboard', [UserController::class, 'dashboard'])->name('dashboard');
-Route::get('/logout', [UserController::class, 'logout'])->name('logout');
+// Route::get('/dashboard', [UserController::class, 'dashboard'])->name('dashboard');
+// Route::get('/logout', [UserController::class, 'logout'])->name('logout');
 
+//middleware group routes
+
+// Route::middleware(['UserCheck'])->get('/dashboard', function () {
+
+//     return view('dashboard');
+// })->name('dashboard');
+
+// Route::prefix('user')->group(function () {
+//     Route::get('/dashboard', [UserController::class, 'dashboard'])->name('dashboard');
+
+// });
+
+// Route::prefix('dashboard')->group(['middleware' => 'UserMiddleware'], function () {
+
+//     // Route::get('/dashboard', [UserController::class, 'dashboard'])->name('dashboard');
+
+//     Route::get('/logout', [UserController::class, 'logout'])->name('logout');
+
+//     Route::get('/', [UserController::class, 'dashboard'])->name('dashboard');
+// });
+
+
+Route::group(['prefix' => 'dashboard', 'middleware' => ['UserMiddleware']], function () {
+    Route::get('/logout', [UserController::class, 'logout'])->name('logout');
+
+    Route::get('/', [UserController::class, 'dashboard'])->name('dashboard');
+});

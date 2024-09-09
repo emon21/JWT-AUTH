@@ -10,7 +10,8 @@ use Illuminate\Http\Request;
 class UserController extends Controller
 {
     //
-    function UserCreate(){
+    function UserCreate()
+    {
         return view('user.user-registration');
     }
     function UserRegistration(Request $request)
@@ -33,7 +34,6 @@ class UserController extends Controller
                 ],
                 status: 201
             );
-          
         } catch (Exception $ex) {
 
             return response()->json(
@@ -50,19 +50,35 @@ class UserController extends Controller
     function UserLogin()
     {
         return view('user.user-login');
-
-       
     }
 
-    function Login(Request $request){
+    function Login(Request $request)
+    {
+        // $user = User::where('email', $request->input('email'))
+        //     ->where('password', $request->input('password'))
+        //     ->count();
+
         $user = User::where('email', $request->input('email'))
             ->where('password', $request->input('password'))
-            ->count();
+            ->select('id')->first();
 
-        if ($user == 1) {
+        if ($user !== null) {
 
             //JWT token Issue JWTToken
-            $token = Token::CreateToken($request->input('email'));
+            // $token = Token::CreateToken($request->input('email'));
+            $token = Token::CreateToken($request->input('email'), $user->id);
+            // return response()->json(
+            //     [
+            //         'status' => 'success',
+            //         'message' => 'User login successfully.',
+            //         'data' => $user,
+            //         // 'token' => $token
+            //     ],
+            //     status: 200
+            // )->cookie('token', $token, 60 * 24 * 30);
+
+            return redirect('/dashboard')->cookie('token', $token, 60 * 24 * 30);
+
 
             // if ($token == 1) {
             //     // redirect to dashboard
@@ -73,12 +89,11 @@ class UserController extends Controller
             //     return redirect('/user-login');
             // }
 
-                //  return response()->json(['status' => 'success', 'message' => 'User login successfully.'], status: 200)->cookie('token', $token, 60 * 24 * 30);
+            //  return response()->json(['status' => 'success', 'message' => 'User login successfully.'], status: 200)->cookie('token', $token, 60 * 24 * 30);
 
-            return redirect('/dashboard')->cookie('token', $token, 60 * 24 * 30);
 
-          
-            
+
+
         } else {
 
             return response()->json(
@@ -92,16 +107,18 @@ class UserController extends Controller
         }
     }
 
-    function dashboard(Request $request){
+    function dashboard(Request $request)
+    {
 
         $token = $request->cookie('token');
         return view('dashboard', ['token' => $token]);
     }
 
     //logout
-    function logout(Request $request){
-        $token = $request->cookie('token');
-        return redirect('/user-login')->cookie('token', $token, 0);
+    function logout(Request $request)
+    {
+        // $token = $request->cookie('token');
+        // return redirect('/user-login')->cookie('token', $token, 0);
+        return redirect('/user-login')->cookie('token', '', -1);
     }
-
 }
